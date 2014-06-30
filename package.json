@@ -1,0 +1,32 @@
+{
+  "name": "NodeJS-cluster",
+  "version": "1.0.0",
+  "description": "Clustering with proxy so you can set multiple domain names on port 80",
+  "main": "cluster.js",
+  "dependencies": {
+    "commander": "~2.2.0",
+    "http-proxy": "~1.1.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DutchProgrammer/NodeJS-cluster.git"
+  },
+  "keywords": [
+    "nodejs",
+    "cluster",
+    "proxy",
+    "multiple",
+    "domains",
+    "port",
+    "80"
+  ],
+  "author": "Danny van der Knaap",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/DutchProgrammer/NodeJS-cluster/issues"
+  }
+}
