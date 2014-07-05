@@ -9,7 +9,7 @@ Domains can be realtime added, removed or just show all domains by command line
 Requirements
 ----
   - Commander
-  - http-proxy
+  - Http proxy
   
   ```sh
 sudo npm install
