@@ -1,92 +1,31 @@
 #!/usr/bin/env node
-var fs  			= require('fs'),
-	domainFile  	= 'domains.js',
-	fileContent 	= fs.readFileSync(domainFile).toString(),
-	domains 		= JSON.parse(fileContent === '' ? {} : fileContent),
-	checkInterval 	= 60*5,
-	nextCheck 		= Math.round(+new Date()/1000)+checkInterval
-;
+var fs            = require('fs');
+var domainFile    = 'domains.json';
+var fileContent   = fs.readFileSync(domainFile).toString();
+var domains       = JSON.parse(fileContent === '' ? {} : fileContent);
+var checkInterval = 60*5;
+var nextCheck     = Math.round(+new Date()/1000)+checkInterval;
+var colors        = require('colors');
 
-/*,
-	domains = {
-	'hefnerubuntubox.nl' : {
-      target: 'http://localhost:9001'
-	},
-	'hefnerubuntubox2.nl' : {
-      target: 'http://localhost:9002'
-	}
-};
-*/
+colors.setTheme({
+	silly: 'rainbow',
+	input: 'grey',
+	verbose: 'cyan',
+	prompt: 'grey',
+	info: 'green',
+	data: 'grey',
+	help: 'cyan',
+	warn: 'yellow',
+	debug: 'blue',
+	error: 'red'
+});
 
-if (process.env._ !== undefined) {
-	var program		= require('commander');
-
-	program
-		.version('0.0.1')
-  		.usage('Type ./cluster.js -h for help')
-		.option('-a, --add', 'Add domain usage: domain.ext port')
-		.option('-r, --remove', 'Remove domain usage domain.ext')
-		.option('-s, --show', 'Show domains')
-		.parse(process.argv)
-	 ;
-
-	if (program.add) {
-
-		var domainName = (process.argv[3] !== undefined ? process.argv[3] : false);
-		var domainPort = (process.argv[4] !== undefined ? process.argv[4] : false);
-
-		console.log(domainName, 'domainName');
-		console.log(domainPort, 'domainPort');
-
-		if (domainName && domainPort ) {
-			if ( domains[domainName] !== undefined) {
-				console.log('This domain name already exists');
-			} else {
-				console.log('Add domain');
-
-				domains[domainName] = {
-					'target': 'http://localhost:'+domainPort
-				};
-
-				fs.writeFileSync(domainFile, JSON.stringify(domains));
-				console.log(domainName+' has been added');
-			}
-		} else {
-			console.log('couldnt found domainName or port, check your params')
-		}
-
-	} else if (program.remove) {
-
-		var domainName = (process.argv[3] !== undefined ? process.argv[3] : false);
-
-		if (domainName && domains[domainName] !== undefined ) {
-			delete domains[domainName];
-
-			fs.writeFileSync(domainFile, JSON.stringify(domains));
-
-			console.log(domainName+' has been removed');
-		} else {
-			console.log('Domain couldnt be found');
-		}
-	} else if (program.show) {
-		for (var domainI in domains) {
-			console.log(domainI, domains[domainI]);
-		}
-	} else {
-		console.log('Type ./cluster.js -h for help')
-	}
-
-	return;
-}
-
-
-var cluster   	= require('cluster'),
-	workers   	= require('./modules/workers').init(cluster),
-	http 		= require('http'),
-	httpPort  	= 80,
-	httpProxy 	= require('http-proxy'),
-	url 		= require('url')
-;
+var cluster   = require('cluster');
+var workers   = require('./modules/workers').init(cluster);
+var http      = require('http');
+var httpPort  = 80;
+var httpProxy = require('http-proxy');
+var url       = require('url');
 
 if (cluster.isMaster) {
 
@@ -97,14 +36,14 @@ if (cluster.isMaster) {
 			var msg = JSON.parse(data);
 
 			if (msg.cmd !== undefined ) {
-			    console.log(msg.cmd+':', msg.msg);
+			    console.log('%s: %s'.info, msg.cmd, msg.msg);
 			}
 		});
 	});
 
-	console.log('HTTP proxy listening on port', httpPort);
+	console.log('HTTP proxy listening on port %s'.input, httpPort);
 } else if (cluster.isWorker) {
-	console.log('I am worker #' + cluster.worker.id);
+	console.log('I am worker # %s'.input, cluster.worker.id);
 
 	workers.proccesSend({ 
 		cmd: 'workerStarted', 
@@ -117,10 +56,9 @@ if (cluster.isMaster) {
 		}
 	});
 
-	//
 	// Listen for the `error` event on `proxy`.
 	proxy.on('error', function (err, req, res) {
-		console.error(err, 'err');
+		console.error(err, 'err'.error);
 
 		res.writeHead(500, {
 			'Content-Type': 'text/plain'
@@ -132,9 +70,6 @@ if (cluster.isMaster) {
 	http.createServer(function(req, res) {
 
 		var host = req.headers.host.replace('www.', '');
-
-		console.log(nextCheck, 'nextCheck');
-		console.log(Math.round(+new Date()/1000), 'now');
 
 		//Check if we need to update already
 		if ((nextCheck-Math.round(+new Date()/1000)) <= 0 ) {
@@ -153,6 +88,12 @@ if (cluster.isMaster) {
 			res.end('Domain wasnt found.');
 		}
 
+	}).on('upgrade', function (req, socket, head) {
+
+		var host = req.headers.host.replace('www.', '');
+
+		console.log(host, 'host');
+		proxy.ws(req, socket, head);
 	}).listen(80);
 
 }
