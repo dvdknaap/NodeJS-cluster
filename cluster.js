@@ -7,6 +7,12 @@ var checkInterval = 60*5;
 var nextCheck     = Math.round(+new Date()/1000)+checkInterval;
 var colors        = require('colors');
 
+var cluster   = require('cluster');
+var workers   = require('./modules/workers').init(cluster);
+var http      = require('http');
+var httpPort  = 80;
+var httpProxy = require('http-proxy');
+
 colors.setTheme({
 	silly: 'rainbow',
 	input: 'grey',
@@ -19,13 +25,6 @@ colors.setTheme({
 	debug: 'blue',
 	error: 'red'
 });
-
-var cluster   = require('cluster');
-var workers   = require('./modules/workers').init(cluster);
-var http      = require('http');
-var httpPort  = 80;
-var httpProxy = require('http-proxy');
-var url       = require('url');
 
 if (cluster.isMaster) {
 
@@ -68,8 +67,8 @@ if (cluster.isMaster) {
 	});
 
 	http.createServer(function(req, res) {
-
-		var host = req.headers.host.replace('www.', '');
+		var requestedUrl = req.headers.host.split('.');
+		var domainName = requestedUrl[requestedUrl.length-2]+'.'+requestedUrl[requestedUrl.length-1];
 
 		//Check if we need to update already
 		if ((nextCheck-Math.round(+new Date()/1000)) <= 0 ) {
@@ -78,8 +77,8 @@ if (cluster.isMaster) {
 			nextCheck 	= Math.round(+new Date()/1000)+checkInterval
 		}
 
-		if (domains[host] !== undefined ) {
-		    proxy.web(req, res, domains[host]);
+		if (domains[domainName] !== undefined ) {
+		    proxy.web(req, res, domains[domainName]);
 		} else {
 			res.writeHead(500, {
 				'Content-Type': 'text/plain'
@@ -89,10 +88,10 @@ if (cluster.isMaster) {
 		}
 
 	}).on('upgrade', function (req, socket, head) {
+		var requestedUrl = req.headers.host.split('.');
+		var domainName = requestedUrl[requestedUrl.length-2]+'.'+requestedUrl[requestedUrl.length-1];
 
-		var host = req.headers.host.replace('www.', '');
-
-		console.log(host, 'host');
+		console.log(domainName, 'domainName');
 		proxy.ws(req, socket, head);
 	}).listen(80);
 
