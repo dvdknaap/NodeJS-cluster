@@ -1,1 +1,1 @@
-{"mijsexshop.nl":{"target":"http://localhost:9001","ws": "true"}}
+{"example1.nl":{"target":"http://localhost:9001","ws": "true"}, "api.example2.nl":{"target":"http://localhost:9002","ws": "true"}, "www.example2.nl":{"target":"http://localhost:9003","ws": "true"},, "example2.nl":{"target":"http://localhost:9004","ws": "true"}}
