@@ -68,7 +68,11 @@ if (cluster.isMaster) {
 
 	http.createServer(function(req, res) {
 		var requestedUrl = req.headers.host.split('.');
-		var domainName = requestedUrl[requestedUrl.length-2]+'.'+requestedUrl[requestedUrl.length-1];
+		var domainName  = requestedUrl/* .replace('www', '')*/;
+
+		if (domains[domainName] === undefined ) {
+			domainName = requestedUrl[requestedUrl.length-2]+'.'+requestedUrl[requestedUrl.length-1];
+		}
 
 		//Check if we need to update already
 		if ((nextCheck-Math.round(+new Date()/1000)) <= 0 ) {
@@ -89,8 +93,12 @@ if (cluster.isMaster) {
 
 	}).on('upgrade', function (req, socket, head) {
 		var requestedUrl = req.headers.host.split('.');
-		var domainName = requestedUrl[requestedUrl.length-2]+'.'+requestedUrl[requestedUrl.length-1];
+		var domainName  = requestedUrl/* .replace('www', '')*/;
 
+		if (domains[domainName] === undefined ) {
+			domainName = requestedUrl[requestedUrl.length-2]+'.'+requestedUrl[requestedUrl.length-1];
+		}
+		
 		console.log(domainName, 'domainName');
 		proxy.ws(req, socket, head);
 	}).listen(80);

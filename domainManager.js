@@ -18,6 +18,19 @@ colors.setTheme({
 	error: 'red'
 });
 
+function checkDomainPorts(port) {
+	if (port === undefined) {
+		throw new Error('No port found');
+	}
+
+	for (var domainI in domains) {
+		if (domains[domainI].target.indexOf(':'+port) !== -1) {
+			return true;
+		}
+	}
+
+	return false;
+}
 var program = require('commander');
 
 program
@@ -37,6 +50,8 @@ if (program.add) {
 	if (domainName && domainPort ) {
 		if ( domains[domainName] !== undefined) {
 			console.warn('This domain name already exists'.warn);
+		} else if (checkDomainPorts(domainPort)) {
+			console.warn('This port name is already in use'.warn);
 		} else {
 			console.info('Add domain'.info);
 
@@ -74,6 +89,8 @@ if (program.add) {
 
 	if (numDomains === 0) {
 		console.log('There are no domain yet');
+	} else {
+		console.log('We\'ve got %s domains').debug, numDomains);
 	}
 } else {
 	program.help();
