@@ -93,10 +93,11 @@ if (cluster.isMaster) {
 		}
 
 	}).on('upgrade', function (req, socket, head) {
-		var requestedUrl = req.headers.host.split('.');
+		var requestedUrl = req.headers.host;
 		var domainName  = requestedUrl/* .replace('www', '')*/;
 
 		if (domains[domainName] === undefined ) {
+			requestedUrl = requestedUrl.split('.');
 			domainName = requestedUrl[requestedUrl.length-2]+'.'+requestedUrl[requestedUrl.length-1];
 		}
 		
