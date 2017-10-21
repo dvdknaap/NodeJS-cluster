@@ -4,6 +4,7 @@
   "description": "Clustering with proxy so you can set multiple domain names on port 80",
   "main": "cluster.js",
   "dependencies": {
+    "colors": "^1.1.2",
     "commander": "~2.2.0",
     "http-proxy": "~1.1.4"
   },
