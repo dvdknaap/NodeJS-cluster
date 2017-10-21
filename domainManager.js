@@ -90,7 +90,7 @@ if (program.add) {
 	if (numDomains === 0) {
 		console.log('There are no domain yet');
 	} else {
-		console.log('We\'ve got %s domains').debug, numDomains);
+		console.log('We\'ve got %s domains'.debug, numDomains);
 	}
 } else {
 	program.help();
